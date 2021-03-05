@@ -270,7 +270,4 @@
     </None>
   </ItemGroup>
 
-  <ItemGroup>
-    <Compile Include="ApiConfig\WindowsBrokerOptions.cs" />
-  </ItemGroup>
 </Project>

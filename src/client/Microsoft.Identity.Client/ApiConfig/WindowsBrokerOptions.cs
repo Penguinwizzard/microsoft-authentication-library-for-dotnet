@@ -33,7 +33,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// 
         /// </summary>
-        public bool ListWindowsAccounts { get; set; } = false;
+        public bool ListWindowsWorkAndSchoolAccounts { get; set; } = false;
 
         internal void LogParameters(ICoreLogger logger)
         {

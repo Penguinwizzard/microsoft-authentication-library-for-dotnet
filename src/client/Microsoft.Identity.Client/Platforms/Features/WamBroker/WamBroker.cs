@@ -571,7 +571,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         {
             using (_logger.LogMethodDuration())
             {
-                if (!_wamOptions.ListWindowsAccounts)
+                if (!_wamOptions.ListWindowsWorkAndSchoolAccounts)
                 {
                     _logger.Info("WAM::FindAllAccountsAsync returning no accounts due to configuration option");
                     return Array.Empty<IAccount>();

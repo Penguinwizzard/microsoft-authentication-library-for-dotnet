@@ -168,6 +168,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="options"></param>
         /// <returns></returns>
+        [System.Runtime.Versioning.OSPlatformAttribute("foo")]
         public PublicClientApplicationBuilder WithWindowsBrokerOptions(WindowsBrokerOptions options)
         {
             WindowsBrokerOptions.ValidatePlatformAvailability();

@@ -12,7 +12,6 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Desktop;
-using Microsoft.Identity.Client.MsaPassthrough;
 
 namespace NetDesktopWinForms
 {
@@ -77,7 +76,10 @@ namespace NetDesktopWinForms
                 // there is no need to construct the PCA with this redirect URI, 
                 // but WAM uses it. We could enforce it.
                 //.WithRedirectUri($"ms-appx-web://microsoft.aad.brokerplugin/{clientId}")
-                .WithMsaPassthrough(msaPt)
+                .WithWindowsBrokerOptions(new WindowsBrokerOptions() {
+                    ListWindowsWorkAndSchoolAccounts = false,
+                    MsaPassthroughUsingPicker = false
+                })
                 .WithLogging((x, y, z) => Debug.WriteLine($"{x} {y}"), LogLevel.Verbose, true)
                 .Build();
 
