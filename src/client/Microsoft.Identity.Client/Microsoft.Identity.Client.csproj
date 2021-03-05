@@ -269,4 +269,8 @@
       <DependentUpon>Splash.resx</DependentUpon>
     </None>
   </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="ApiConfig\WindowsBrokerOptions.cs" />
+  </ItemGroup>
 </Project>

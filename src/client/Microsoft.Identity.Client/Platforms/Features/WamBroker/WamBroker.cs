@@ -44,10 +44,11 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         private readonly IMsaPassthroughHandler _msaPassthroughHandler;
         private const string WamErrorPrefix = "WAM Error ";
         internal const string ErrorMessageSuffix = " For more details see https://aka.ms/msal-net-wam";
-
+        private readonly WindowsBrokerOptions _wamOptions;
 
         public WamBroker(
             CoreUIParent uiParent,
+            ApplicationConfiguration appConfig,
             ICoreLogger logger,
             IWamPlugin testAadPlugin = null,
             IWamPlugin testmsaPlugin = null,
@@ -69,6 +70,9 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 
             _msaPassthroughHandler = msaPassthroughHandler ??
                 new MsaPassthroughHandler(_logger, _msaPlugin, _wamProxy, _parentHandle);
+
+            _wamOptions = appConfig.WindowsBrokerOptions ?? 
+                new WindowsBrokerOptions();
 
         }
 
@@ -106,7 +110,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             if (authenticationRequestParameters.Account != null ||
                 !string.IsNullOrEmpty(authenticationRequestParameters.LoginHint))
             {
-                bool isMsaPassthrough = authenticationRequestParameters.AppConfig.IsMsaPassthrough;
+                bool isMsaPassthrough = _wamOptions.MsaPassthroughUsingPicker;
                 bool isMsa = await IsMsaRequestAsync(
                     authenticationRequestParameters.Authority,
                     authenticationRequestParameters?.Account?.HomeAccountId?.TenantId, // TODO: we could furher optimize here by searching for an account based on UPN
@@ -161,7 +165,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
 
             // Implication for MSA-PT apps is that they won't use the transfer token approach
             if (IsAadOnlyAuthority(authenticationRequestParameters.Authority) &&
-                !authenticationRequestParameters.AppConfig.IsMsaPassthrough)
+                !_wamOptions.MsaPassthroughUsingPicker)
             {
                 return await AcquireInteractiveWithAadBrowserAsync(
                     authenticationRequestParameters,
@@ -291,7 +295,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
             AuthenticationRequestParameters authenticationRequestParameters,
             Prompt msalPrompt)
         {
-            bool isMsaPassthrough = authenticationRequestParameters.AppConfig.IsMsaPassthrough;
+            bool isMsaPassthrough = _wamOptions.MsaPassthroughUsingPicker;
             var accountPicker = _accountPickerFactory.Create(
                 _parentHandle,
                 _logger,
@@ -412,7 +416,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                 bool isMsa = await IsMsaRequestAsync(
                     authenticationRequestParameters.Authority,
                     null,
-                    authenticationRequestParameters.AppConfig.IsMsaPassthrough)
+                    _wamOptions.MsaPassthroughUsingPicker)
                     .ConfigureAwait(false);
 
                 IWamPlugin wamPlugin = isMsa ? _msaPlugin : _aadPlugin;
@@ -474,7 +478,7 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
                 bool isMsa = await IsMsaRequestAsync(
                     authenticationRequestParameters.Authority,
                     null,
-                    authenticationRequestParameters.AppConfig.IsMsaPassthrough).ConfigureAwait(false);
+                    _wamOptions.MsaPassthroughUsingPicker).ConfigureAwait(false);
 
                 IWamPlugin wamPlugin = isMsa ? _msaPlugin : _aadPlugin;
                 WebAccountProvider provider = await GetProviderAsync(
@@ -567,7 +571,14 @@ namespace Microsoft.Identity.Client.Platforms.Features.WamBroker
         {
             using (_logger.LogMethodDuration())
             {
-                if (!ApiInformation.IsMethodPresent(
+                if (!_wamOptions.ListWindowsAccounts)
+                {
+                    _logger.Info("WAM::FindAllAccountsAsync returning no accounts due to configuration option");
+                    return Array.Empty<IAccount>();
+                }
+
+                if (                  
+                    !ApiInformation.IsMethodPresent(
                     "Windows.Security.Authentication.Web.Core.WebAuthenticationCoreManager",
                     "FindAllAccountsAsync"))
                 {

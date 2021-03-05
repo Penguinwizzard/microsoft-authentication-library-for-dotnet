@@ -115,6 +115,7 @@ namespace Microsoft.Identity.Client
             return this;
         }
 
+    
         /// <summary>
         /// Sets the <paramref name="loginHint"/>, in order to avoid select account
         /// dialogs in the case the user is signed-in with several identities. This method is mutually exclusive

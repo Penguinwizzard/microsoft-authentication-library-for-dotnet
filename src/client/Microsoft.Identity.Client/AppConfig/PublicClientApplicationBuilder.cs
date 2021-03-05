@@ -163,6 +163,18 @@ namespace Microsoft.Identity.Client
 #pragma warning restore CS0162 // Unreachable code detected
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="options"></param>
+        /// <returns></returns>
+        public PublicClientApplicationBuilder WithWindowsBrokerOptions(WindowsBrokerOptions options)
+        {
+            WindowsBrokerOptions.ValidatePlatformAvailability();
+            Config.WindowsBrokerOptions = options;
+            return this;
+        }
+
 #if WINDOWS_APP
         /// <summary>
         /// Flag to enable authentication with the user currently signed-in on Windows.
